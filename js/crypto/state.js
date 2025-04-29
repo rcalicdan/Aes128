@@ -4,7 +4,7 @@ export default class AesState {
         this.currentKey = '';
         this.currentState = new Array(16).fill(0);
         this.currentStep = 0;
-        this.totalSteps = 44; // Initial + 10 rounds * 4 operations + final
+        this.totalSteps = 43; // Initial + 10 rounds * 4 operations - 1 (last round has no MixColumns)
         this.roundStates = [];  // To store state after each round
         this.roundKeys = [];    // To store round keys
     }

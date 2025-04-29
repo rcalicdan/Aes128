@@ -83,12 +83,15 @@ export function setupEventListeners(aesState) {
         handleReset(aesState);
 
         // Fast forward through all steps
-        const totalStepsToRun = aesState.totalSteps;
+        const totalStepsToRun = 43; // Updated to match the actual number of steps in AES-128
         let stepsRun = 0;
 
         function runNextStep() {
             if (stepsRun < totalStepsToRun) {
-                handleStep(aesState);
+                if (!handleStep(aesState)) {
+                    // If handleStep returns false, we're done
+                    return;
+                }
                 stepsRun++;
                 setTimeout(runNextStep, 50); // Run steps with a small delay to show progress
             }
@@ -116,12 +119,36 @@ function handleStep(aesState) {
     const round = Math.floor(aesState.currentStep / 4);
     const operation = aesState.currentStep % 4;
 
+    // Check if we've completed all rounds (round 10 should be the last round)
+    // Round 10 only has SubBytes, ShiftRows, and AddRoundKey (no MixColumns)
+    if (round > 10 || (round === 10 && operation > 2)) {
+        // We've completed all operations, display the final result
+        Object.keys(elements.resultDisplays).forEach(format => {
+            updateResultDisplay(
+                format,
+                aesState.currentState,
+                elements.resultDisplays[format]
+            );
+        });
+        
+        // Show the hex tab
+        const hexTab = document.getElementById('hex-tab');
+        if (hexTab) {
+            const tab = new bootstrap.Tab(hexTab);
+            tab.show();
+        }
+        
+        return false; // Signal that we're done with encryption
+    }
+
     const operations = ['sub-bytes', 'shift-rows', 'mix-columns', 'add-round-key'];
     let opName = operations[operation];
 
     // Last round doesn't have MixColumns
     if (round === 10 && operation === 2) {
         opName = 'add-round-key';
+        // Adjust currentStep to skip the MixColumns operation
+        aesState.currentStep++;
     }
 
     // Update round selector
@@ -157,7 +184,7 @@ function handleStep(aesState) {
     aesState.currentStep++;
 
     // Show encrypted result after final step
-    if (aesState.currentStep >= aesState.totalSteps) {
+    if ((round === 10 && operation === 2) || aesState.currentStep >= 43) {
         // Update all result formats
         Object.keys(elements.resultDisplays).forEach(format => {
             updateResultDisplay(
@@ -174,6 +201,8 @@ function handleStep(aesState) {
             tab.show();
         }
     }
+    
+    return true; // Signal that we can continue
 }
 
 // Handle reset
@@ -221,7 +250,7 @@ function handleReset(aesState) {
     elements.roundSelector.value = 'initial';
 }
 
-// Handle round selector change (continued)
+// Handle round selector change
 function handleRoundChange(value, aesState) {
     const round = value === 'initial' ? 0 : parseInt(value);
 
