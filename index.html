@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-128 Interactive Demonstration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container py-4" id="aes-interactive">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="text-center">AES-128 Encryption Explorer</h1>
+                <p class="lead text-center">An interactive demonstration of the AES-128 encryption process</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Input</h4>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="plaintext" class="form-control" rows="3" placeholder="Enter your message to encrypt...">Hello, this is a secret message!</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Encryption Key</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="key-choice" id="generate-key" value="generate" checked>
+                            <label class="form-check-label" for="generate-key">Generate random key</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="key-choice" id="custom-key-radio" value="custom">
+                            <label class="form-check-label" for="custom-key-radio">Use custom key</label>
+                        </div>
+                        
+                        <div id="key-input-container" class="mt-3" style="display: none;">
+                            <input type="text" id="custom-key" class="form-control" placeholder="Enter 16-character key (128 bits)" maxlength="16">
+                            <div class="form-text">Must be exactly 16 characters</div>
+                        </div>
+                        
+                        <div id="generated-key-display" class="mt-3">
+                            <div class="alert alert-secondary key-display" id="key-display">Generating...</div>
+                            <button id="regenerate-key" class="btn btn-outline-secondary">Generate New Key</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="d-grid gap-2 d-md-flex">
+                    <button id="encrypt-btn" class="btn btn-success btn-lg">Encrypt</button>
+                    <button id="step-btn" class="btn btn-primary btn-lg">Step Through Process</button>
+                    <button id="reset-btn" class="btn btn-outline-secondary btn-lg">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">AES-128 Visualization</h4>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">Round:</span>
+                                <select id="round-selector" class="form-select form-select-sm" style="width: auto;">
+                                    <option value="initial">Initial</option>
+                                    <option value="1">Round 1</option>
+                                    <option value="2">Round 2</option>
+                                    <!-- Options for rounds 3-9 would be here -->
+                                    <option value="10">Round 10 (Final)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="state-grid" id="state-grid">
+                                    <!-- State grid will be populated dynamically -->
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="alert alert-info" id="state-explanation">
+                                    Select an operation below or click "Step Through Process" to begin
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <ul class="nav nav-tabs mt-4" id="operation-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="sub-bytes-tab" data-bs-toggle="tab" data-bs-target="#sub-bytes-content" type="button" role="tab" data-tab="sub-bytes">SubBytes</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="shift-rows-tab" data-bs-toggle="tab" data-bs-target="#shift-rows-content" type="button" role="tab" data-tab="shift-rows">ShiftRows</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="mix-columns-tab" data-bs-toggle="tab" data-bs-target="#mix-columns-content" type="button" role="tab" data-tab="mix-columns">MixColumns</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="add-round-key-tab" data-bs-toggle="tab" data-bs-target="#add-round-key-content" type="button" role="tab" data-tab="add-round-key">AddRoundKey</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content py-3" id="tab-content">
+                            <div class="tab-pane fade show active" id="sub-bytes-content" role="tabpanel">
+                                <!-- Content for SubBytes tab -->
+                            </div>
+                            <div class="tab-pane fade" id="shift-rows-content" role="tabpanel">
+                                <!-- Content for ShiftRows tab -->
+                            </div>
+                            <div class="tab-pane fade" id="mix-columns-content" role="tabpanel">
+                                <!-- Content for MixColumns tab -->
+                            </div>
+                            <div class="tab-pane fade" id="add-round-key-content" role="tabpanel">
+                                <!-- Content for AddRoundKey tab -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Result</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-pills mb-3" id="result-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="hex-tab" data-bs-toggle="pill" data-bs-target="#hex-content" type="button" role="tab" data-result="hex">Hexadecimal</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="b64-tab" data-bs-toggle="pill" data-bs-target="#b64-content" type="button" role="tab" data-result="b64">Base64</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="bin-tab" data-bs-toggle="pill" data-bs-target="#bin-content" type="button" role="tab" data-result="bin">Binary</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="result-display">
+                            <div class="tab-pane fade show active" id="hex-content" role="tabpanel">
+                                <div class="result-placeholder p-3 bg-light rounded">Encrypted output will appear here</div>
+                            </div>
+                            <div class="tab-pane fade" id="b64-content" role="tabpanel">
+                                <div class="result-placeholder p-3 bg-light rounded">Encrypted output will appear here</div>
+                            </div>
+                            <div class="tab-pane fade" id="bin-content" role="tabpanel">
+                                <div class="result-placeholder p-3 bg-light rounded">Encrypted output will appear here</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="aes.js"></script>
+</body>
+</html>

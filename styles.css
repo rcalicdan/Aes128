@@ -1,0 +1,143 @@
+/* Custom styling to complement Bootstrap */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.key-display {
+    font-family: monospace;
+    letter-spacing: 1px;
+    word-break: break-all;
+}
+
+.state-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 5px;
+    margin: 0 auto;
+}
+
+.state-grid-cell {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    text-align: center;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.s-box-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 3px;
+    margin: 15px 0;
+}
+
+.s-box-cell {
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    padding: 8px;
+    text-align: center;
+    font-family: monospace;
+}
+
+.shift-diagram {
+    margin: 20px 0;
+    font-family: monospace;
+}
+
+.shift-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.before,
+.after {
+    padding: 8px;
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    min-width: 120px;
+    text-align: center;
+}
+
+.arrow {
+    padding: 0 15px;
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.mix-columns-diagram {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    font-family: monospace;
+}
+
+.matrix-multiplication {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.matrix,
+.column-matrix,
+.result-matrix {
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    text-align: center;
+}
+
+.add-round-key-diagram {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.xor-operation {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: monospace;
+}
+
+.state-matrix,
+.key-matrix,
+.result-matrix {
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    padding: 15px;
+    text-align: center;
+}
+
+.math-note {
+    font-style: italic;
+    margin-top: 15px;
+    color: #6c757d;
+}
+
+/* Highlight active cells during operations */
+.state-grid-cell.highlight {
+    background-color: #e2f0d9;
+    border-color: #28a745;
+}
+
+/* Animation for state changes */
+@keyframes cellUpdate {
+    0% {
+        background-color: #fff;
+    }
+
+    50% {
+        background-color: #d4edda;
+    }
+
+    100% {
+        background-color: #fff;
+    }
+}
+
+.updated {
+    animation: cellUpdate 1s ease;
+}
