@@ -34,7 +34,9 @@
                 class="form-control"
                 rows="3"
                 placeholder="Enter your message to encrypt..."
-              >Hello, this is a secret message!</textarea>
+              >
+Hello, this is a secret message!</textarea
+              >
             </div>
           </div>
         </div>
@@ -321,25 +323,32 @@
         </div>
       </div>
 
-      <!-- New section for visualization of S-box, shift rows, etc. -->
       <div class="row mt-4">
         <div class="col-md-12">
           <div class="card">
             <div class="card-header bg-info text-white">
-              <h4 class="mb-0">Visualization Details</h4>
+              <h4 class="mb-0">Round Progress</h4>
             </div>
             <div class="card-body">
-              <div class="s-box-grid" id="s-box-visual">
-                <!-- S-box grid will be populated dynamically -->
+              <div class="progress round-progress">
+                <div
+                  id="round-progress-bar"
+                  class="progress-bar"
+                  role="progressbar"
+                  style="width: 0%"
+                  aria-valuenow="0"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
               </div>
-              <div class="shift-rows-diagram" id="shift-rows-visual">
-                <!-- Shift rows diagram will be populated dynamically -->
-              </div>
-              <div class="mix-columns-diagram" id="mix-columns-visual">
-                <!-- Mix columns diagram will be populated dynamically -->
-              </div>
-              <div class="add-round-key-diagram" id="add-round-key-visual">
-                <!-- Add round key diagram will be populated dynamically -->
+
+              <h5 class="mt-4 mb-3">Round Summary</h5>
+              <div class="row" id="round-summary">
+                <div class="col-12">
+                  <div class="alert alert-info">
+                    Complete rounds will appear here as they are processed
+                  </div>
+                </div>
               </div>
             </div>
           </div>
