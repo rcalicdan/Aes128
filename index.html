@@ -34,9 +34,7 @@
                 class="form-control"
                 rows="3"
                 placeholder="Enter your message to encrypt..."
-              >
-Hello, this is a secret message!</textarea
-              >
+              >Hello, this is a secret message!</textarea>
             </div>
           </div>
         </div>
@@ -219,28 +217,28 @@ Hello, this is a secret message!</textarea
                   id="sub-bytes-content"
                   role="tabpanel"
                 >
-                  <!-- Content for SubBytes tab -->
+                  <!-- Content for SubBytes tab - dynamically populated -->
                 </div>
                 <div
                   class="tab-pane fade"
                   id="shift-rows-content"
                   role="tabpanel"
                 >
-                  <!-- Content for ShiftRows tab -->
+                  <!-- Content for ShiftRows tab - dynamically populated -->
                 </div>
                 <div
                   class="tab-pane fade"
                   id="mix-columns-content"
                   role="tabpanel"
                 >
-                  <!-- Content for MixColumns tab -->
+                  <!-- Content for MixColumns tab - dynamically populated -->
                 </div>
                 <div
                   class="tab-pane fade"
                   id="add-round-key-content"
                   role="tabpanel"
                 >
-                  <!-- Content for AddRoundKey tab -->
+                  <!-- Content for AddRoundKey tab - dynamically populated -->
                 </div>
               </div>
             </div>
@@ -317,6 +315,31 @@ Hello, this is a secret message!</textarea
                     Encrypted output will appear here
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New section for visualization of S-box, shift rows, etc. -->
+      <div class="row mt-4">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header bg-info text-white">
+              <h4 class="mb-0">Visualization Details</h4>
+            </div>
+            <div class="card-body">
+              <div class="s-box-grid" id="s-box-visual">
+                <!-- S-box grid will be populated dynamically -->
+              </div>
+              <div class="shift-rows-diagram" id="shift-rows-visual">
+                <!-- Shift rows diagram will be populated dynamically -->
+              </div>
+              <div class="mix-columns-diagram" id="mix-columns-visual">
+                <!-- Mix columns diagram will be populated dynamically -->
+              </div>
+              <div class="add-round-key-diagram" id="add-round-key-visual">
+                <!-- Add round key diagram will be populated dynamically -->
               </div>
             </div>
           </div>

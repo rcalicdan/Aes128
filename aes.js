@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentState = new Array(16).fill(0);
     let currentStep = 0;
     const totalSteps = 44; // Initial + 10 rounds * 4 operations + final
+    let roundStates = [];  // To store state after each round
+    let roundKeys = [];    // To store round keys
 
     // Elements
     const keyChoiceRadios = document.querySelectorAll('input[name="key-choice"]');
@@ -54,6 +56,27 @@ document.addEventListener('DOMContentLoaded', function () {
             if (i % 2 === 1 && i < key.length - 1) hexKey += ' ';
         }
         keyDisplay.textContent = hexKey;
+    }
+
+    // Simplified key expansion for visualization purposes
+    function expandKey(masterKey) {
+        const expandedKeys = [];
+        let currentKey = [...masterKey];
+        
+        // Add the initial key
+        expandedKeys.push([...currentKey]);
+        
+        // Generate 10 more round keys
+        for (let round = 1; round <= 10; round++) {
+            // Simplified key schedule - in real AES this is more complex
+            const newKey = currentKey.map((byte, i) => 
+                (byte + round * 11 + i * 7) % 256
+            );
+            expandedKeys.push(newKey);
+            currentKey = newKey;
+        }
+        
+        return expandedKeys;
     }
 
     // Initialize with a random key
@@ -373,6 +396,71 @@ document.addEventListener('DOMContentLoaded', function () {
         updateTabContent('add-round-key');
     }
 
+    // Update round progress bar
+    function updateRoundProgress(round, operation) {
+        const progressBar = document.getElementById('round-progress-bar');
+        if (!progressBar) return;
+        
+        const totalOperations = 44; // Initial + 10 rounds * 4 operations + final
+        const currentOperation = round * 4 + operation;
+        const progressPercentage = (currentOperation / totalOperations) * 100;
+        
+        progressBar.style.width = progressPercentage + '%';
+        progressBar.setAttribute('aria-valuenow', progressPercentage);
+        
+        // Change color based on progress
+        if (progressPercentage < 30) {
+            progressBar.className = 'progress-bar bg-info';
+        } else if (progressPercentage < 70) {
+            progressBar.className = 'progress-bar bg-primary';
+        } else if (progressPercentage < 90) {
+            progressBar.className = 'progress-bar bg-warning';
+        } else {
+            progressBar.className = 'progress-bar bg-success';
+        }
+    }
+
+    // Update round summary display
+    function updateRoundSummary() {
+        const summaryContainer = document.getElementById('round-summary');
+        if (!summaryContainer) return;
+        
+        summaryContainer.innerHTML = '';
+        
+        // Add each round that has been calculated
+        for (let i = 0; i < roundStates.length; i++) {
+            if (roundStates[i]) {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'col-md-3 col-sm-4 col-6';
+                
+                const stateHex = roundStates[i].map(b => 
+                    b.toString(16).padStart(2, '0')
+                ).join(' ');
+                
+                roundDiv.innerHTML = `
+                    <div class="card mb-2 round-summary-card" data-round="${i}">
+                        <div class="card-header p-2 ${i === roundStates.length - 1 ? 'bg-success text-white' : ''}">
+                            ${i === 0 ? 'Initial' : 'Round ' + i}
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="small text-muted font-monospace" style="font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis;">
+                                ${stateHex}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                summaryContainer.appendChild(roundDiv);
+                
+                // Add click handler to jump to this round
+                roundDiv.querySelector('.round-summary-card').addEventListener('click', () => {
+                    roundSelector.value = i === 0 ? 'initial' : i.toString();
+                    roundSelector.dispatchEvent(new Event('change'));
+                });
+            }
+        }
+    }
+
     // Tab switching functionality using Bootstrap's tab events
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
         tab.addEventListener('shown.bs.tab', event => {
@@ -405,8 +493,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 newState = performMixColumns([...currentState]);
                 break;
             case 'add-round-key':
-                // Create a simple round key for demonstration
-                const roundKey = Array(16).fill(0).map((_, i) => i * 7 % 256);
+                // Use the appropriate round key if available
+                const round = Math.floor(currentStep / 4);
+                const roundKey = roundKeys[round] || Array(16).fill(0).map((_, i) => i * 7 % 256);
                 newState = performAddRoundKey([...currentState], roundKey);
                 break;
             default:
@@ -414,43 +503,45 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return newState;
     }
+
     // Step through the encryption process
     stepBtn.addEventListener('click', () => {
-        if (currentStep >= totalSteps) {
-            currentStep = 0;
-            currentState = new Array(16).fill(0);
-        }
-
-        // Initialize state with plaintext on first step
         if (currentStep === 0) {
+            // Initialize with plaintext and generate round keys
             const plaintext = document.getElementById('plaintext').value;
+            currentState = new Array(16).fill(0);
             for (let i = 0; i < 16; i++) {
                 currentState[i] = i < plaintext.length ? plaintext.charCodeAt(i) : 0;
             }
+            
+            // Convert current key to byte array
+            const keyBytes = Array.from(currentKey).map(c => c.charCodeAt(0));
+            
+            // Generate round keys
+            roundKeys = expandKey(keyBytes);
+            
+            // Store initial state
+            roundStates = [[...currentState]];
         }
-
-        // Determine which operation to perform based on step
+        
+        // Determine which operation to perform
         const round = Math.floor(currentStep / 4);
         const operation = currentStep % 4;
-
+        
         const operations = ['sub-bytes', 'shift-rows', 'mix-columns', 'add-round-key'];
         let opName = operations[operation];
-
+        
         // Last round doesn't have MixColumns
         if (round === 10 && operation === 2) {
             opName = 'add-round-key';
         }
-
+        
         // Update round selector
         roundSelector.value = round === 0 ? 'initial' : round.toString();
-
-        // Show the appropriate tab
-        const tabElement = document.querySelector(`[data-tab="${opName}"]`);
-        if (tabElement) {
-            const tab = new bootstrap.Tab(tabElement);
-            tab.show();
-        }
-
+        
+        // Update round progress bar
+        updateRoundProgress(round, operation);
+        
         // Perform operation
         switch (opName) {
             case 'sub-bytes':
@@ -463,22 +554,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 currentState = performMixColumns(currentState);
                 break;
             case 'add-round-key':
-                // Create a simple round key for demonstration
-                const roundKey = Array(16).fill(0).map((_, i) => ((i * 7) + round * 3) % 256);
-                currentState = performAddRoundKey(currentState, roundKey);
+                // Use the proper round key from our expanded key
+                currentState = performAddRoundKey(currentState, roundKeys[round]);
+                
+                // Store state after each complete round
+                if (operation === 3 || (round === 10 && operation === 2)) {
+                    if (!roundStates[round + 1]) {
+                        roundStates[round + 1] = [...currentState];
+                        updateRoundSummary();
+                    }
+                }
                 break;
         }
-
+        
+        // Show appropriate tab
+        const tabElement = document.querySelector(`[data-tab="${opName}"]`);
+        if (tabElement) {
+            const tab = new bootstrap.Tab(tabElement);
+            tab.show();
+        }
+        
         updateVisualization(currentState, opName);
         currentStep++;
-
+        
         // Show encrypted result after final step
         if (currentStep >= totalSteps) {
             // Update all result formats
             updateResultDisplay('hex', currentState);
             updateResultDisplay('b64', currentState);
             updateResultDisplay('bin', currentState);
-
+            
             // Show the hex tab
             const hexTab = document.getElementById('hex-tab');
             if (hexTab) {
@@ -492,23 +597,82 @@ document.addEventListener('DOMContentLoaded', function () {
     resetBtn.addEventListener('click', () => {
         currentStep = 0;
         currentState = new Array(16).fill(0);
+        roundStates = [];
+        roundKeys = [];
         initStateGrid();
         updateVisualization(currentState, '');
-
+        
+        // Reset progress bar
+        const progressBar = document.getElementById('round-progress-bar');
+        if (progressBar) {
+            progressBar.style.width = '0%';
+            progressBar.setAttribute('aria-valuenow', 0);
+            progressBar.className = 'progress-bar';
+        }
+        
         // Reset result displays
         Object.keys(resultDisplays).forEach(format => {
             resultDisplays[format].innerHTML = '<div class="result-placeholder p-3 bg-light rounded">Encrypted output will appear here</div>';
         });
-
+        
+        // Reset round summary
+        const summaryContainer = document.getElementById('round-summary');
+        if (summaryContainer) {
+            summaryContainer.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        Complete rounds will appear here as they are processed
+                    </div>
+                </div>
+            `;
+        }
+        
         // Reset to initial tab
         const subBytesTab = document.getElementById('sub-bytes-tab');
         if (subBytesTab) {
             const tab = new bootstrap.Tab(subBytesTab);
             tab.show();
         }
-
+        
         // Reset round selector
         roundSelector.value = 'initial';
+    });
+
+    // Round selector change handler
+    roundSelector.addEventListener('change', function() {
+        const round = this.value === 'initial' ? 0 : parseInt(this.value);
+        
+        // If we haven't computed this round yet, we need to calculate up to that point
+        if (!roundStates[round] && round > 0) {
+            // Reset and compute up to the selected round
+            resetBtn.click();
+            for (let i = 0; i < round * 4; i++) {
+                stepBtn.click();
+            }
+        } else {
+            // We've already computed this round, just show it
+            if (roundStates[round]) {
+                currentState = [...roundStates[round]];
+                updateVisualization(currentState, '');
+                
+                // Set currentStep based on round
+                currentStep = round * 4;
+                
+                // Update progress bar
+                updateRoundProgress(round, 0);
+            }
+        }
+        
+        // Update explanation based on selected round
+        let roundExplanation = '';
+        if (round === 0) {
+            roundExplanation = 'Initial state after plaintext is loaded and initial AddRoundKey is performed.';
+        } else if (round === 10) {
+            roundExplanation = 'Final round (Round 10) - includes SubBytes, ShiftRows, and AddRoundKey (no MixColumns).';
+        } else {
+            roundExplanation = `Round ${round} - includes all four operations: SubBytes, ShiftRows, MixColumns, and AddRoundKey.`; 
+        }
+        stateExplanation.textContent = roundExplanation;
     });
 
     // Encrypt button functionality
@@ -517,24 +681,18 @@ document.addEventListener('DOMContentLoaded', function () {
         resetBtn.click();
 
         // Fast forward through all steps
-        for (let i = 0; i < totalSteps; i++) {
-            stepBtn.click();
+        const totalStepsToRun = totalSteps;
+        let stepsRun = 0;
+        
+        function runNextStep() {
+            if (stepsRun < totalStepsToRun) {
+                stepBtn.click();
+                stepsRun++;
+                setTimeout(runNextStep, 50); // Run steps with a small delay to show progress
+            }
         }
-    });
-
-    // Round selector change handler
-    roundSelector.addEventListener('change', function () {
-        const round = this.value === 'initial' ? 0 : parseInt(this.value);
-
-        // Calculate the step based on the round
-        // Each round has 4 operations, so step = round * 4
-        let targetStep = round * 4;
-
-        // Reset and run up to the selected round
-        resetBtn.click();
-        for (let i = 0; i < targetStep; i++) {
-            stepBtn.click();
-        }
+        
+        runNextStep();
     });
 
     // Custom key input handler

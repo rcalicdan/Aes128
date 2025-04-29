@@ -123,6 +123,37 @@ body {
     border-color: #28a745;
 }
 
+/* Round visualization enhancements */
+.round-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.round-operation {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.round-operation h5 {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.round-progress {
+    height: 5px;
+    margin-bottom: 15px;
+}
+
+.round-progress .progress-bar {
+    transition: width 0.5s ease;
+}
+
 /* Animation for state changes */
 @keyframes cellUpdate {
     0% {
